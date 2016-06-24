@@ -15,27 +15,31 @@
 # ================================================================================
 
 # Resetting parameters that are input to this script
-unset runNum
-unset inDir
+unset runNum inDir barcodes
 
 
 # Help message for usage
 usage()
 {
-    echo "usage: initial_processing.sh -r run_number -i input_directory"
-    echo "    -r run_number: Run number, used for folder naming."
-    echo "    -i input_directory: Directory to find FASTQ files for processing. It's " \
-         "assumed that all files in this directory are to be processed."
+    echo "usage: initial_processing.sh -r run_number -i input_directory -b barcode_file"
+    echo "    run_number: Run number, used for folder naming."
+    echo "    input_directory: Directory to find FASTQ files for processing. " \
+         "NOTE:  It's assumed that all files in this directory are to be processed."
+    echo "    barcode_file: File with one sample's barcode(s) and/or sample name " \
+         "per line. For more info, see the Stacks' process_radtags manual."
 }
 
 # Parsing options
-while getopts ":r:i:h" opt; do
+while getopts ":r:i:b:h" opt; do
   case $opt in
     r)
       export runNum=$OPTARG
       ;;
     i)
       export inDir=$OPTARG
+      ;;
+    b)
+      export barcodes=$OPTARG
       ;;
     h)
       usage
@@ -55,9 +59,10 @@ while getopts ":r:i:h" opt; do
 done
 
 # Checking that all options are provided
-if [[ -z "$runNum" || -z "$inDir" ]]
+if [[ -z "$runNum" || -z "$inDir" || -z "$barcodes" ]]
 then
-    echo "ERROR: Options -r and -i are required." >&2
+    echo "ERROR: Options -r (run_number), -i (input_directory), and -b " \
+         "(barcodes_file) are required." >&2
     usage
     exit 1
 fi
@@ -96,8 +101,6 @@ cd ${fastqDir}
 
 module load stacks/1.40
 
-export barcodes=barcodes_${runNum}.txt
-
 mkdir -p separated
 
 process_radtags \
@@ -130,10 +133,10 @@ mv *.rem.* ./rem_files/
 
 for f in *.fq.gz
 do
-    # Fix file names
+    # Fix file names: *.<x>.fq.gz --> *_<x>.fastq.gz (<x> is 1 or 2)
     g=`echo ${f/%.fq.gz/} | sed 's/.1$/_1/g; s/.2$/_2/g'`.fastq.gz
     mv $f $g
-    # Rename reads in *_2 files
+    # Rename reads in *_2 files: *_2 --> *_1 (to match those in *_1 files)
     if [[ ${g} == *"_2.fastq.gz"* ]]
     then
         gunzip -c ${g} | sed 's/_2$/_1/g' - | gzip > ${g/_2.fastq/_2_tmp.fastq}

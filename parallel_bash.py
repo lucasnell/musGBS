@@ -45,30 +45,29 @@ if __name__ == '__main__':
     Parser.add_argument('-s', '--shellScript', required = True,
                         help = 'Shell script to run in parallel.')
 
+    Parser.add_argument('-t', '--totalCores', type = int,
+                        required = True,
+                        help = "How many total cores are available?")
+
     perSamp_help = \
         """How many cores should the script use per sample? Must be a factor of
-        `totalCores`. Will be provided to shell script as the input for `-c` (e.g.,
-        `<your_script> -c 4`). Defaults to 1."""
+        `totalCores`. Defaults to 1."""
     Parser.add_argument('-p', '--perSampCores', type = int,
                         required = False, default = 1,
                         help = ' '.join(perSamp_help.split()))
-
-    Parser.add_argument('-t', '--totalCores', type = int,
-                        required = False, default = 1,
-                        help = "How many total cores are available? Defaults to 1.")
 
     shellOpts_help = \
         """Options to input to shell script.
         The letter associated with the option should be in the beginning and separated
         from the arguments by a ':'; if no arguments are required for
         that option, still include the ':'.
-        To separate multiple options, use ';'.
+        For multiple options, provide multiple separate strings.
         Arguments must be (1) of length 1, in which case they will be the same for all
         iterations of script, or (2) of the same length as the number of iterations
-        and separated by ','. For example, if you wanted to run a parallel version of
+        and separated by ';'. For example, if you wanted to run a parallel version of
         `./my_script.sh -x A -y 1 -z && ./my_script.sh -x A -y 2 -z`, you would provide
-        the following string here: 'x:A;y:1,2;z:'. Defaults to '' (no options)."""
-    Parser.add_argument('-o', '--shellOpts', default = '',
+        the following strings here: 'x:A' 'y:1;2' 'z:'."""
+    Parser.add_argument('shellOpts', nargs = '+'
                         help = ' '.join(shellOpts_help.split()))
 
     # =================================
@@ -79,42 +78,31 @@ if __name__ == '__main__':
     cores = args['totalCores']
     cores_i = args['perSampCores']
     shellOpts = args['shellOpts']
-    if args['shellScript'].__class__ == list:
-        shellScript = os.path.expanduser(args['shellScript'][0])
-    else:
-        shellScript = os.path.expanduser(args['shellScript'])
+    shellScript = os.path.expanduser(args['shellScript'])
 
     assert cores % cores_i == 0, '`perSampCores` be a factor of `totalCores`.'
 
     # Separate `shellOpts`
-    if shellOpts != '':
-        assert not (shellOpts.count(':') - shellOpts.count(';')) < 1, \
-            'Not all options include a ":".'
-        assert not (shellOpts.count(':') - shellOpts.count(';')) > 1, \
-            'Not all options are separated by a ";".'
+    assert  all([x.count(':') == 1 for x in shellOpts]), \
+        'Not all `shellOpts` include exactly one ":".'
 
-    try:
-        optDict = {'-' + x.split(':')[0]: x.split(':')[1].split(',')
-                   for x in shellOpts.split(';')}
-    except IndexError:
-        bashScripts = ['%s -c %i' % (shellScript, cores_i)]
-    else:
-        maxLen = max([len(x) for x in optDict.values()])
-        # Expand all option arguments to be the same length
-        for i in optDict.keys():
-            if len(optDict[i]) == 1:
-                optDict[i] = optDict[i] * maxLen
-            elif len(optDict[i]) == maxLen:
-                continue
-            else:
-                raise AttributeError(
-                    'Argument lengths must be 1 or the same as all others > 1.')
-        # Iterate from 1 to `maxLen`, creating strings of script with options
-        bashScripts = []
-        for j in range(maxLen):
-            args_i = [' '.join([' '.join([i, optDict[i][j]])
-                                for i in optDict.keys()])][0]
-            bashScripts += ['%s -c %i %s' % (shellScript, cores_i, args_i)]
+    optDict = {'-' + x.split(':')[0]: x.split(':')[1].split(';') for x in shellOpts}
+    maxLen = max([len(x) for x in optDict.values()])
+    # Expand all option arguments to be the same length
+    for i in optDict.keys():
+        if len(optDict[i]) == 1:
+            optDict[i] = optDict[i] * maxLen
+        elif len(optDict[i]) == maxLen:
+            continue
+        else:
+            raise AttributeError(
+                'Argument lengths must be 1 or the same as all others > 1.')
+    # Iterate from 1 to `maxLen`, creating strings of script with options
+    bashScripts = []
+    for j in range(maxLen):
+        args_i = [' '.join([' '.join([i, optDict[i][j]])
+                            for i in optDict.keys()])][0]
+        bashScripts += ['%s %s' % (shellScript, args_i)]
 
     # Make sure shell script is executable
     perms = os.stat(shellScript)

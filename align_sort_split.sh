@@ -18,10 +18,10 @@ unset cores
 usage()
 {
     echo "usage: align_sort_split.sh -r run_number -s sample_name -c available_cores"
-    echo "    -r run_number: Run number, used for folder naming."
-    echo "    -s sample_name: Sample name, used for file naming."
-    echo "    -c available_cores: Number of cores available for multithreaded " \
-         "processing in SAMtools and bowtie2. "
+    echo "    run_number: Run number, used for folder naming."
+    echo "    sample_name: Sample name, used for file naming."
+    echo "    available_cores: Number of cores available for multithreaded " \
+         "processing in SAMtools and bowtie2."
 }
 
 # Parsing input parameters
@@ -83,6 +83,8 @@ export outDir=/lustre1/lan/musGBS/bam_mapped/run_${runNum}
 
 export read1_list=`ls -m ${samp}*_1.fastq.gz | tr -d ' \n'`
 export read2_list=`ls -m ${samp}*_2.fastq.gz | tr -d ' \n'`
+
+mkdir -p ${outDir}
 
 bowtie2 -p ${cores} -x ${btBuild} \
     -1 ${read1_list} \
