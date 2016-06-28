@@ -2,7 +2,8 @@
 
 
 # Example usage:
-# ./initial_processing.sh -r 132571 -i /lustre1/lan/musGBS/fastq/original/run_${RUN}
+# ./initial_processing.sh -r 132571 -i /lustre1/lan/musGBS/fastq/original/run_${RUN} \
+#     -b /lustre1/lan/musGBS/fastq/run_132571/barcodes_132571.txt
 
 
 
