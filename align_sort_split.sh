@@ -235,11 +235,10 @@ rm ${samp}_allUnmapped.bam ${samp}_Xpart?.bam \
 # Move files other than mapped BAMs out of here, first checking that all output
 # directories exist
 
-for f in "logs" "../bam/run_${runNum}" "../fastq_unmapped/run_${runNum}"
+for f in "../bam/run_${runNum}" "../fastq_unmapped/run_${runNum}"
 do
     mkdir -p "$f"
 done
 
-mv *.log ./logs/
 mv ${samp}.bam ${samp}.bam.bai ../bam/run_${runNum}/
 mv ${samp}.fastq.gz ../fastq_unmapped/run_${runNum}/
