@@ -71,6 +71,7 @@ fi
 # ------------
 # Checking that filename extensions match what's provided
 # ------------
+# Setting parameters for checks
 if [ "${fileFormat}" = "bam" ]
 then
     i=1

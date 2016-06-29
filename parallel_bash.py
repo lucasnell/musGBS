@@ -67,7 +67,7 @@ if __name__ == '__main__':
         and separated by ';'. For example, if you wanted to run a parallel version of
         `./my_script.sh -x A -y 1 -z && ./my_script.sh -x A -y 2 -z`, you would provide
         the following strings here: 'x:A' 'y:1;2' 'z:'."""
-    Parser.add_argument('shellOpts', nargs = '+'
+    Parser.add_argument('shellOpts', nargs = '+',
                         help = ' '.join(shellOpts_help.split()))
 
     # =================================
