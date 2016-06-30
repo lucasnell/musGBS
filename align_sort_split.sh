@@ -235,10 +235,16 @@ rm ${samp}_allUnmapped.bam ${samp}_Xpart?.bam \
 # Move files other than mapped BAMs out of here, first checking that all output
 # directories exist
 
-for f in "../bam/run_${runNum}" "../fastq_unmapped/run_${runNum}"
-do
-    mkdir -p "$f"
-done
 
-mv ${samp}.bam ${samp}.bam.bai ../bam/run_${runNum}/
-mv ${samp}.fastq.gz ../fastq_unmapped/run_${runNum}/
+# BAM file with all reads, both mapped and unmapped
+mkdir -p "/lustre1/lan/musGBS/bam/run_${runNum}"
+
+mv ${samp}.bam ${samp}.bam.bai /lustre1/lan/musGBS/bam/run_${runNum}/
+# Also remove '_mapped' from mapped BAM file (not necessary bc it's already in
+# mapped folder )
+mv ${samp}_mapped.bam ${samp}.bam
+mv ${samp}_mapped.bam.bai ${samp}.bam.bai
+
+
+mkdir -p "/lustre1/lan/musGBS/fastq_unmapped/run_${runNum}"
+mv ${samp}.fastq.gz /lustre1/lan/musGBS/fastq_unmapped/run_${runNum}/
