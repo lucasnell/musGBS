@@ -71,7 +71,7 @@ fi
 
 if [[ -z "$outFile" ]]
 then
-    export outFile=${inFile/%.bam/.bed}
+    export outFile=${inFile/%.bam/}
 fi
 
 
