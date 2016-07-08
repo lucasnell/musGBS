@@ -13,9 +13,11 @@ These scripts were designed solely for my drive on the HPC cluster at UGA.
 The order of scripts to be run is as follows:
 
 ```
-initial_processing.sh –> align_sort_split.sh ─┬─> merge_runs.sh ─> make_stacks.sh ─┐
-                                         ... ─┤     [catalog] ┄┄> call_stacks.sh <─┘
-        [same as above, for additional runs] ─┘               { ?? } <─┘
+initial_processing.sh –> align_sort_split.sh ─┬─> merge_runs.sh ─> make_stacks.sh ─>┐
+                                         ... ─┤      │                              │
+        [same as above, for additional runs] ─┘      └──> catalog_stacks.sh ───────>┤
+                                                                                    │
+                                                 { ?? } <────── call_stacks.sh <────┘
 ```
 
 ### Python script

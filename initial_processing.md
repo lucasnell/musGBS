@@ -5,7 +5,8 @@
 # Combining FASTQ from sequencing facility
 
 Two libraries of 96 samples, using paired-end genotyping by sequencing (GBS) using the
-restriction enzyme *ApeKI*. Libraries are from runs 132571 and ... **FILL IN LATER**.
+restriction enzyme *ApeKI*. Libraries are from runs 132571, 2, and whatever you want to
+call the 3rd run (I'd recommend "3").
 
 Files from run 132571 (located in
 `/Volumes/MW_18TB/NextGen_RawData/Mouse_GBS_CASTxDOM_F2`):
